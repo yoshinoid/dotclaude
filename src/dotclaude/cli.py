@@ -9,6 +9,7 @@ import typer
 from dotclaude import __version__
 from dotclaude.commands.config import config_app
 from dotclaude.commands.login import login_app
+from dotclaude.commands.pull import pull_app
 from dotclaude.commands.register import register_app
 from dotclaude.commands.serve import serve_app
 from dotclaude.commands.sync import sync_app
@@ -23,6 +24,7 @@ app = typer.Typer(
 
 app.add_typer(config_app, name="config")
 app.add_typer(login_app, name="login")
+app.add_typer(pull_app, name="pull")
 app.add_typer(register_app, name="register")
 app.add_typer(sync_app, name="sync")
 app.add_typer(serve_app, name="serve")
