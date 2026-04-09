@@ -5,6 +5,7 @@ Renders all sections in a single terminal view using rich for colors and tables.
 
 from __future__ import annotations
 
+from dotclaude_types.models import DotClaudeData
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -22,7 +23,6 @@ from dotclaude.display.formatters import (
     format_tokens,
     short_model,
 )
-from dotclaude_types.models import DotClaudeData
 
 _console = Console()
 

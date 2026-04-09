@@ -73,10 +73,10 @@ def calculate_cost(model: str, usage: UsageForCost) -> float:
     if pricing is None:
         return 0.0
 
-    M = 1_000_000
-    input_cost = (usage.input_tokens / M) * pricing.input
-    output_cost = (usage.output_tokens / M) * pricing.output
-    cache_write_cost = (usage.cache_creation_input_tokens / M) * pricing.cache_write
-    cache_read_cost = (usage.cache_read_input_tokens / M) * pricing.cache_read
+    million = 1_000_000
+    input_cost = (usage.input_tokens / million) * pricing.input
+    output_cost = (usage.output_tokens / million) * pricing.output
+    cache_write_cost = (usage.cache_creation_input_tokens / million) * pricing.cache_write
+    cache_read_cost = (usage.cache_read_input_tokens / million) * pricing.cache_read
 
     return input_cost + output_cost + cache_write_cost + cache_read_cost

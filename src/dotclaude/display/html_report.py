@@ -5,6 +5,8 @@ Produces a single HTML file with embedded CSS — no external dependencies.
 
 from __future__ import annotations
 
+from dotclaude_types.models import DotClaudeData
+
 from dotclaude.display.formatters import (
     format_cost,
     format_number,
@@ -13,7 +15,6 @@ from dotclaude.display.formatters import (
     format_tokens,
     short_model,
 )
-from dotclaude_types.models import DotClaudeData
 
 
 def _escape_html(s: str) -> str:

@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from dotclaude_types.models import PluginsStatus
+
 from dotclaude.parser.utils import safe_json_parse
 
 

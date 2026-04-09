@@ -5,6 +5,11 @@ from __future__ import annotations
 import asyncio
 
 import typer
+from dotclaude_types.models import (
+    GeminiInsightsResponse,
+    InsightSignal,
+    Recommendation,
+)
 from rich.console import Console
 
 from dotclaude.insights import (
@@ -17,11 +22,6 @@ from dotclaude.insights import (
     generate_recommendations,
     get_gemini_api_key,
     get_system_prompt,
-)
-from dotclaude_types.models import (
-    GeminiInsightsResponse,
-    InsightSignal,
-    Recommendation,
 )
 from dotclaude.parser import analyze
 

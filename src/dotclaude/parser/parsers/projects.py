@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from dotclaude_types.models import ProjectConfig, ProjectStats
+
 from dotclaude.parser.utils import decode_project_path
 
 _MEMORY_FILE_EXTENSIONS: frozenset[str] = frozenset([".md", ".txt", ".json"])

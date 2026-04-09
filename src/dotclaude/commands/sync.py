@@ -7,7 +7,7 @@ import asyncio
 import typer
 from rich.console import Console
 
-from dotclaude import __version__ as PACKAGE_VERSION
+from dotclaude import __version__ as package_version
 from dotclaude.parser import analyze
 from dotclaude.utils.api_client import ApiError, AuthRequiredError, api_request
 
@@ -25,7 +25,7 @@ async def _do_sync(claude_dir: str | None = None) -> None:
     res = await api_request(
         "/api/sync",
         method="POST",
-        json_body={"data": data.model_dump(by_alias=True), "client_version": PACKAGE_VERSION},
+        json_body={"data": data.model_dump(by_alias=True), "client_version": package_version},
     )
 
     if not res.is_success:

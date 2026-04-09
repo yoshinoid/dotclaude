@@ -5,8 +5,9 @@ Ported from TypeScript: src/__tests__/insights/recommendations.test.ts
 
 from __future__ import annotations
 
-from dotclaude.insights.recommendations import generate_recommendations
 from dotclaude_types.models import DotClaudeData
+
+from dotclaude.insights.recommendations import generate_recommendations
 
 
 def _make_data(**overrides: object) -> DotClaudeData:

@@ -297,8 +297,6 @@ def _emit_recommendations(
 ) -> None:
     """Emit recommendations for a matched catalog entry."""
     max_count = _get_max_extension_count(catalog_entry, extensions)
-    base_confidence: Recommendation.__class__  # type annotation hint
-
     if max_count >= 50:
         confidence: str = "high"
     elif max_count >= 15:

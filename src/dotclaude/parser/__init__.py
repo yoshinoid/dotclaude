@@ -6,11 +6,10 @@ Public API:
 
 from __future__ import annotations
 
+import contextlib
 import re
-from datetime import UTC, datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 
-from dotclaude import __version__ as PACKAGE_VERSION
 from dotclaude_types.models import (
     AnalyzeOptions,
     CacheStats,
@@ -31,6 +30,8 @@ from dotclaude_types.models import (
     SummaryStats,
     TopDirectory,
 )
+
+from dotclaude import __version__ as package_version
 from dotclaude.parser.parsers.configs import ConfigsParseInput, parse_configs
 from dotclaude.parser.parsers.conversations import parse_conversations
 from dotclaude.parser.parsers.plugins import parse_plugins
@@ -46,7 +47,7 @@ __all__ = [
     "scan_claude_dir",
     "get_claude_dir",
     "normalize_cwd",
-    "PACKAGE_VERSION",
+    "package_version",
 ]
 
 
@@ -287,6 +288,7 @@ def _assign_cwd_breakdowns(
     Uses exact match first, then longest-prefix match for subdirectory cwds.
     """
     from dotclaude_types.models import ProjectBreakdown
+
     from dotclaude.parser.parsers.conversations import CwdAccumulator
 
     if not cwd_accumulators:
@@ -299,10 +301,8 @@ def _assign_cwd_breakdowns(
 
         # Exact match first
         match_idx = -1
-        try:
+        with contextlib.suppress(ValueError):
             match_idx = normalized_paths.index(cwd)
-        except ValueError:
-            pass
 
         # Longest prefix match
         if match_idx == -1:
@@ -465,7 +465,7 @@ async def analyze(options_or_dir: str | AnalyzeOptions | dict[str, object] | Non
         meta=DotClaudeMeta(
             claude_dir=resolved_dir,
             scanned_at=datetime.now(tz=UTC).isoformat(),
-            version=PACKAGE_VERSION,
+            version=package_version,
             filters=filters,
         ),
         summary=summary_stats,

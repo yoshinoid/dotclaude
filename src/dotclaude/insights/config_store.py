@@ -26,10 +26,7 @@ _KEY_SERVER_URL = "serverUrl"
 def _resolve_config_path() -> Path:
     """Return the path to the config file."""
     xdg_config = os.environ.get("XDG_CONFIG_HOME")
-    if xdg_config:
-        base = Path(xdg_config)
-    else:
-        base = Path.home() / ".config"
+    base = Path(xdg_config) if xdg_config else Path.home() / ".config"
     return base / "dotclaude" / "config.json"
 
 
