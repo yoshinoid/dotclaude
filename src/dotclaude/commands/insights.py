@@ -8,7 +8,6 @@ import typer
 from dotclaude_types.models import (
     GeminiInsightsResponse,
     InsightSignal,
-    Recommendation,
 )
 from rich.console import Console
 
@@ -23,6 +22,8 @@ from dotclaude.insights import (
     get_gemini_api_key,
     get_system_prompt,
 )
+from dotclaude.insights.merge import MergedRecommendation, merge_recommendations
+from dotclaude.insights.server_recommendations import fetch_recommendations
 from dotclaude.parser import analyze
 
 _console = Console()
@@ -137,7 +138,12 @@ def _render_gemini_result(result: GeminiInsightsResponse, locale: str) -> None:
     _console.print()
 
 
-def _render_recommendations(recs: list[Recommendation], locale: str) -> None:
+def _render_merged_recommendations(
+    merged: list[MergedRecommendation],
+    server_count: int,
+    local_count: int,
+    locale: str,
+) -> None:
     divider = "\u2500" * 50
     _console.print(f"\n[bold]{divider}[/bold]")
     header = (
@@ -148,7 +154,7 @@ def _render_recommendations(recs: list[Recommendation], locale: str) -> None:
     _console.print(f"[bold] {header}[/bold]")
     _console.print(f"[bold]{divider}[/bold]")
 
-    if not recs:
+    if not merged:
         no_recs = (
             "추가 추천 사항이 없습니다. 설정이 잘 되어 있습니다!"
             if locale == "ko"
@@ -158,32 +164,60 @@ def _render_recommendations(recs: list[Recommendation], locale: str) -> None:
         _console.print()
         return
 
+    # Sub-header: source breakdown
+    if server_count > 0 and local_count > 0:
+        src_label = (
+            f"서버 {server_count}개, 로컬 {local_count}개"
+            if locale == "ko"
+            else f"{server_count} from server, {local_count} from local"
+        )
+    elif server_count > 0:
+        src_label = "서버 추천" if locale == "ko" else "from server"
+    else:
+        src_label = "로컬 추천" if locale == "ko" else "from local"
+
+    _console.print(f"\n  [dim]Recommendations ({src_label})[/dim]\n")
+
     type_icons = {
         "agent": "[cyan]\u25c6[/cyan]",
         "rule": "[magenta]\u25c7[/magenta]",
         "hook": "[yellow]\u26a1[/yellow]",
         "skill": "[green]\u2605[/green]",
+        "command": "[blue]\u25a0[/blue]",
     }
-    conf_styles = {"high": "green", "medium": "yellow", "low": "dim"}
 
-    _console.print()
-    for rec in recs:
+    # Column header
+    _console.print(
+        f"  [bold]{'Type':<8} {'Title':<22} {'Score':>6}  Source[/bold]"
+    )
+    _console.print(f"  {'─' * 46}")
+
+    for rec in merged:
         icon = type_icons.get(rec.type, "\u00b7")
-        style = conf_styles.get(rec.confidence, "white")
+        score_str = f"{rec.score:.2f}" if rec.score is not None else "  -  "
+
+        source_badge = "[cyan]\u25c6 server[/cyan]" if rec.source == "server" else "[dim]\u25cb local[/dim]"
+
         _console.print(
-            f"  {icon}  [bold]{rec.name}[/bold]  [dim][{rec.type}][/dim]  [{style}]{rec.confidence}[/{style}]"
+            f"  {icon} [dim]{rec.type:<7}[/dim] [bold]{rec.title:<22}[/bold]"
+            f" {score_str:>6}  {source_badge}"
         )
-        _console.print(f"     {rec.description}")
-        _console.print(f"     [cyan]\u2192[/cyan] [dim]{rec.action_path}[/dim]")
-        _console.print(f"     [dim]{rec.reason}[/dim]")
+        if rec.description:
+            _console.print(f"            [dim]{rec.description}[/dim]")
+        if rec.reason:
+            _console.print(f"            [dim italic]{rec.reason}[/dim italic]")
+        if rec.action_path:
+            _console.print(
+                f"            [cyan]\u2192[/cyan] [dim]{rec.action_path}[/dim]"
+            )
         _console.print()
 
-    agent_count = sum(1 for r in recs if r.type == "agent")
-    rule_count = sum(1 for r in recs if r.type == "rule")
+    agent_count = sum(1 for r in merged if r.type == "agent")
+    rule_count = sum(1 for r in merged if r.type == "rule")
     summary = (
-        f"  {len(recs)}개 추천 (agent: {agent_count}, rule: {rule_count})"
+        f"  {len(merged)}개 추천 (agent: {agent_count}, rule: {rule_count})"
         if locale == "ko"
-        else f"  {len(recs)} recommendations (agent: {agent_count}, rule: {rule_count})"
+        else f"  {len(merged)} recommendations (agent: {agent_count}, rule: {rule_count})"
     )
     _console.print(f"[dim]{summary}[/dim]")
     disclaimer = (
@@ -219,8 +253,20 @@ def run_insights(path: str | None = None, evolve: bool = False) -> None:
     signals = detect_signals(data)
 
     if evolve:
-        recs = generate_recommendations(data)
-        _render_recommendations(recs, locale)
+        # 1. Fetch server recommendations (non-blocking — returns None on failure)
+        fetch_msg = "서버 추천 가져오는 중..." if locale == "ko" else "Fetching server recommendations..."
+        _err_console.print(f"[dim]{fetch_msg}[/dim]", end="\r")
+        server_recs = fetch_recommendations()
+        _err_console.print("                                        ", end="\r")
+
+        # 2. Generate local catalog recommendations
+        local_recs = generate_recommendations(data)
+
+        # 3. Merge: server first, local as supplement
+        merged, server_count, local_count = merge_recommendations(server_recs, local_recs)
+
+        # 4. Render merged result
+        _render_merged_recommendations(merged, server_count, local_count, locale)
         return
 
     api_key = get_gemini_api_key()
