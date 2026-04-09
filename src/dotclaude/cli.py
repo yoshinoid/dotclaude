@@ -27,6 +27,22 @@ app.add_typer(sync_app, name="sync")
 app.add_typer(serve_app, name="serve")
 
 
+@app.command()
+def format(  # noqa: A001
+    path: Annotated[str, typer.Argument(help="Target ~/.claude directory")] = "~/.claude",
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Preview changes without writing files")] = False,
+    force: Annotated[bool, typer.Option("--force", help="Overwrite existing dc_ fields")] = False,
+    type_filter: Annotated[
+        str | None,
+        typer.Option("--type", help="Filter by type: rule | agent | skill | command"),
+    ] = None,
+) -> None:
+    """Apply dc_ frontmatter to Markdown files in the target directory."""
+    from dotclaude.commands.format import run_format
+
+    run_format(path=path, dry_run=dry_run, force=force, type_filter=type_filter)
+
+
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context = typer.Context,

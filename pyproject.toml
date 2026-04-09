@@ -25,6 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "dotclaude-types>=0.1.0",
+    "dotclaude-rag>=0.1.0",
     "typer>=0.12",
     "rich>=13.0",
     "pydantic>=2.7",

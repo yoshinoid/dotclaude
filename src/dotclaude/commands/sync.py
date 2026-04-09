@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
+from pathlib import Path
+from typing import Any
 
 import typer
 from rich.console import Console
 
 from dotclaude import __version__ as package_version
+from dotclaude.commands.format import _TYPE_GLOBS
 from dotclaude.parser import analyze
 from dotclaude.utils.api_client import ApiError, AuthRequiredError, api_request
 
@@ -15,8 +19,112 @@ _console = Console()
 sync_app = typer.Typer(name="sync", help="Sync ~/.claude usage data to the dotclaude server")
 
 
+def _collect_knowledge_items(claude_dir: str) -> list[dict[str, Any]]:
+    """Collect ~/.claude/ config files and convert to KnowledgeItem dicts.
+
+    For each Markdown file found under *claude_dir* (agents, rules, skills,
+    commands), reads its content and builds a knowledge item dict suitable for
+    ``POST /api/knowledge/bulk``.
+
+    dc_-prefixed frontmatter fields are used when present; otherwise
+    :func:`~dotclaude_rag.frontmatter.inference.infer_frontmatter` derives them
+    automatically from the file path and content.
+
+    Args:
+        claude_dir: Absolute path to the ``~/.claude`` directory.
+
+    Returns:
+        List of knowledge item dicts, one per collected file.
+    """
+    from dotclaude_rag.frontmatter.inference import infer_frontmatter
+    from dotclaude_rag.frontmatter.parser import extract_dc_fields, parse
+
+    base = Path(claude_dir).expanduser().resolve()
+    items: list[dict[str, Any]] = []
+
+    for _file_type, glob_pattern in _TYPE_GLOBS:
+        for file_path in sorted(base.glob(glob_pattern)):
+            if not file_path.is_file():
+                continue
+
+            try:
+                content = file_path.read_text(encoding="utf-8")
+            except OSError:
+                continue
+
+            # Compute source_path relative to the claude dir.
+            try:
+                relative = file_path.relative_to(base)
+                source_path = relative.as_posix()
+            except ValueError:
+                source_path = file_path.name
+
+            # Parse frontmatter; use dc_ fields when available, otherwise infer.
+            metadata, body = parse(content)
+            fm = extract_dc_fields(metadata)
+            if fm is None:
+                fm = infer_frontmatter(str(file_path), content)
+
+            content_hash = hashlib.sha256(content.encode()).hexdigest()
+
+            items.append(
+                {
+                    "type": fm.dc_type,
+                    "stack": fm.dc_stack,
+                    "scope": fm.dc_scope,
+                    "title": fm.dc_description or source_path,
+                    "description": fm.dc_description,
+                    "content": content,
+                    "content_hash": content_hash,
+                    "source_path": source_path,
+                }
+            )
+
+    return items
+
+
+async def _upload_knowledge(items: list[dict[str, Any]]) -> dict[str, Any]:
+    """POST /api/knowledge/bulk with the collected items.
+
+    Args:
+        items: List of knowledge item dicts produced by
+            :func:`_collect_knowledge_items`.
+
+    Returns:
+        Parsed JSON response dict from the server
+        (``uploaded``, ``skipped``, ``chunks_created``).
+
+    Raises:
+        ApiError: When the server returns a non-success response.
+        AuthRequiredError: When the user is not logged in.
+    """
+    res = await api_request(
+        "/api/knowledge/bulk",
+        method="POST",
+        json_body={"items": items},
+    )
+
+    if not res.is_success:
+        try:
+            body = res.json()
+            detail = body.get("detail", res.reason_phrase)
+        except Exception:
+            detail = res.reason_phrase
+        raise ApiError(detail or "Knowledge upload failed", res.status_code)
+
+    return dict(res.json())
+
+
 async def _do_sync(claude_dir: str | None = None) -> None:
-    """Perform a single sync operation."""
+    """Perform a single sync operation.
+
+    Step 1: Analyze the Claude directory and POST snapshot to /api/sync.
+    Step 2: Collect knowledge files and POST to /api/knowledge/bulk.
+            Failure at step 2 emits a warning but does not abort the command.
+    """
+    resolved_dir = claude_dir or str(Path("~/.claude").expanduser())
+
+    # --- Step 1: snapshot sync ---
     try:
         data = await analyze(claude_dir)
     except Exception as e:
@@ -45,6 +153,34 @@ async def _do_sync(claude_dir: str | None = None) -> None:
     except Exception:
         time_str = synced_at
     _console.print(f"[green]\u2714[/green]  Synced at {time_str}")
+
+    # --- Step 2: knowledge upload ---
+    try:
+        items = _collect_knowledge_items(resolved_dir)
+    except Exception as e:
+        _console.print(f"[yellow]\u26a0[/yellow]  Knowledge collection failed: {e}")
+        return
+
+    if not items:
+        return
+
+    try:
+        upload_result = await _upload_knowledge(items)
+        uploaded = upload_result.get("uploaded", 0)
+        skipped = upload_result.get("skipped", 0)
+        chunks = upload_result.get("chunks_created", 0)
+        _console.print(
+            f"  [dim]Knowledge: {len(items)} files \u2192 "
+            f"{uploaded} uploaded, {skipped} unchanged, {chunks} chunks created[/dim]"
+        )
+    except AuthRequiredError as e:
+        _console.print(f"[yellow]\u26a0  Knowledge upload failed: {e}[/yellow]")
+    except ApiError as e:
+        _console.print(
+            f"[yellow]\u26a0  Knowledge upload failed: {e.status_code} {e}[/yellow]"
+        )
+    except Exception as e:
+        _console.print(f"[yellow]\u26a0  Knowledge upload failed: {e}[/yellow]")
 
 
 @sync_app.callback(invoke_without_command=True)
