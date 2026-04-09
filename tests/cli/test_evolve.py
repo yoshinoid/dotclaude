@@ -248,11 +248,45 @@ def test_merge_score_preserved_for_server() -> None:
     assert merged[0].score == pytest.approx(0.81)
 
 
-def test_fetch_recommendations_invalid_json_returns_none() -> None:
-    """When server response is not a list, fetch_recommendations returns None."""
+def test_fetch_recommendations_envelope_format() -> None:
+    """Server returns envelope dict — recommendations extracted correctly."""
+    raw_response = {
+        "snapshot_id": "abc-123",
+        "cached": False,
+        "recommendations": [
+            {
+                "knowledgeId": "kid-1",
+                "title": "Python Rules",
+                "type": "rule",
+                "stack": ["python"],
+                "snippet": "some text",
+                "score": 0.92,
+                "reason": "python stack detected",
+                "source": "rag",
+            }
+        ],
+    }
+
     mock_response = MagicMock()
     mock_response.is_success = True
-    mock_response.json.return_value = {"error": "unexpected shape"}
+    mock_response.json.return_value = raw_response
+
+    with patch(
+        "dotclaude.insights.server_recommendations.api_request",
+        new=AsyncMock(return_value=mock_response),
+    ):
+        result = fetch_recommendations()
+
+    assert result is not None
+    assert len(result) == 1
+    assert result[0].title == "Python Rules"
+
+
+def test_fetch_recommendations_unexpected_type_returns_none() -> None:
+    """When server response is neither dict nor list, fetch_recommendations returns None."""
+    mock_response = MagicMock()
+    mock_response.is_success = True
+    mock_response.json.return_value = 42  # unexpected type
 
     with patch(
         "dotclaude.insights.server_recommendations.api_request",

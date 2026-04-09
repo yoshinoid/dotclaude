@@ -66,14 +66,26 @@ async def _fetch_async(top_k: int) -> list[ServerRecommendation] | None:
         logger.warning("fetch_recommendations: failed to parse JSON: %s", exc)
         return None
 
-    if not isinstance(raw, list):
+    # envelope에서 recommendations 추출
+    if isinstance(raw, dict):
+        items = raw.get("recommendations", [])
+    elif isinstance(raw, list):
+        items = raw  # fallback for direct list response
+    else:
         logger.warning(
-            "fetch_recommendations: expected list, got %s", type(raw).__name__
+            "fetch_recommendations: unexpected response type %s", type(raw).__name__
+        )
+        return None
+
+    if not isinstance(items, list):
+        logger.warning(
+            "fetch_recommendations: recommendations field is not a list, got %s",
+            type(items).__name__,
         )
         return None
 
     results: list[ServerRecommendation] = []
-    for item in raw:
+    for item in items:
         if not isinstance(item, dict):
             continue
         try:
