@@ -27,8 +27,8 @@ app.add_typer(sync_app, name="sync")
 app.add_typer(serve_app, name="serve")
 
 
-@app.command()
-def format(  # noqa: A001
+@app.command(name="format")
+def format_cmd(
     path: Annotated[str, typer.Argument(help="Target ~/.claude directory")] = "~/.claude",
     dry_run: Annotated[bool, typer.Option("--dry-run", help="Preview changes without writing files")] = False,
     force: Annotated[bool, typer.Option("--force", help="Overwrite existing dc_ fields")] = False,

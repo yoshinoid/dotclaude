@@ -10,7 +10,7 @@ from click.exceptions import Exit as ClickExit
 from typer.testing import CliRunner
 
 from dotclaude.cli import app
-from dotclaude.commands.format import _collect_files, run_format
+from dotclaude.commands.format import TYPE_GLOBS, _collect_files, run_format
 
 runner = CliRunner()
 
@@ -42,6 +42,32 @@ def _make_claude_dir(tmp_path: Path) -> Path:
     (base / "skills" / "my-skill").mkdir(parents=True)
     (base / "commands").mkdir(parents=True)
     return base
+
+
+# ---------------------------------------------------------------------------
+# TYPE_GLOBS public constant
+# ---------------------------------------------------------------------------
+
+
+class TestTypeGlobs:
+    def test_type_globs_is_public(self) -> None:
+        """TYPE_GLOBS must be importable without underscore prefix (S1 fix)."""
+        assert TYPE_GLOBS is not None
+        assert len(TYPE_GLOBS) > 0
+
+    def test_type_globs_covers_all_types(self) -> None:
+        """TYPE_GLOBS must include all four known file types."""
+        types = {ft for ft, _ in TYPE_GLOBS}
+        assert types == {"agent", "rule", "skill", "command"}
+
+    def test_type_globs_importable_from_sync(self) -> None:
+        """sync.py must be able to import TYPE_GLOBS from format.py."""
+        from dotclaude.commands.sync import _collect_knowledge_items  # noqa: F401
+
+        # If the import in sync.py is broken, this would raise ImportError
+        import dotclaude.commands.sync as sync_module
+
+        assert hasattr(sync_module, "_collect_knowledge_items")
 
 
 # ---------------------------------------------------------------------------

@@ -8,6 +8,7 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from dotclaude_types.models import KnowledgeItem
 
 from dotclaude.commands.sync import _collect_knowledge_items, _upload_knowledge
 from dotclaude.utils.api_client import ApiError, AuthRequiredError
@@ -57,11 +58,12 @@ class TestCollectKnowledgeItems:
 
         items = _collect_knowledge_items(str(base))
 
-        source_paths = {i["source_path"] for i in items}
+        source_paths = {i.source_path for i in items}
         assert "rules/python.md" in source_paths
         assert "agents/helper.md" in source_paths
 
-    def test_item_has_required_keys(self, tmp_path: Path) -> None:
+    def test_items_are_knowledge_item_instances(self, tmp_path: Path) -> None:
+        """_collect_knowledge_items returns KnowledgeItem model instances."""
         base = _make_claude_dir(tmp_path)
         (base / "rules" / "test.md").write_text(_PLAIN_RULE, encoding="utf-8")
 
@@ -69,8 +71,16 @@ class TestCollectKnowledgeItems:
 
         assert len(items) == 1
         item = items[0]
-        for key in ("type", "stack", "scope", "title", "description", "content", "content_hash", "source_path"):
-            assert key in item, f"Missing key: {key}"
+        assert isinstance(item, KnowledgeItem)
+        # Verify all required attributes are present and non-None
+        assert item.type is not None
+        assert item.stack is not None
+        assert item.scope is not None
+        assert item.title is not None
+        assert item.description is not None
+        assert item.content is not None
+        assert item.content_hash is not None
+        assert item.source_path is not None
 
     def test_infers_type_from_path(self, tmp_path: Path) -> None:
         base = _make_claude_dir(tmp_path)
@@ -79,9 +89,9 @@ class TestCollectKnowledgeItems:
 
         items = _collect_knowledge_items(str(base))
 
-        by_path = {i["source_path"]: i for i in items}
-        assert by_path["rules/test.md"]["type"] == "rule"
-        assert by_path["agents/bot.md"]["type"] == "agent"
+        by_path = {i.source_path: i for i in items}
+        assert by_path["rules/test.md"].type == "rule"
+        assert by_path["agents/bot.md"].type == "agent"
 
     def test_uses_dc_frontmatter_when_present(self, tmp_path: Path) -> None:
         """Files with dc_ frontmatter use those values instead of inference."""
@@ -95,11 +105,11 @@ class TestCollectKnowledgeItems:
         assert len(items) == 1
         item = items[0]
         # dc_type from frontmatter
-        assert item["type"] == "agent"
+        assert item.type == "agent"
         # dc_stack from frontmatter
-        assert item["stack"] == ["python"]
+        assert item.stack == ["python"]
         # dc_description from frontmatter
-        assert item["description"] == "My Python Agent"
+        assert item.description == "My Python Agent"
 
     def test_content_hash_is_sha256(self, tmp_path: Path) -> None:
         base = _make_claude_dir(tmp_path)
@@ -108,7 +118,7 @@ class TestCollectKnowledgeItems:
         items = _collect_knowledge_items(str(base))
 
         expected_hash = hashlib.sha256(_PLAIN_RULE.encode()).hexdigest()
-        assert items[0]["content_hash"] == expected_hash
+        assert items[0].content_hash == expected_hash
 
     def test_same_content_produces_same_hash(self, tmp_path: Path) -> None:
         base = _make_claude_dir(tmp_path)
@@ -117,7 +127,7 @@ class TestCollectKnowledgeItems:
 
         items = _collect_knowledge_items(str(base))
 
-        hashes = [i["content_hash"] for i in items]
+        hashes = [i.content_hash for i in items]
         assert hashes[0] == hashes[1]
 
     def test_different_content_produces_different_hash(self, tmp_path: Path) -> None:
@@ -127,7 +137,7 @@ class TestCollectKnowledgeItems:
 
         items = _collect_knowledge_items(str(base))
 
-        hashes = [i["content_hash"] for i in items]
+        hashes = [i.content_hash for i in items]
         assert hashes[0] != hashes[1]
 
     def test_source_path_is_relative(self, tmp_path: Path) -> None:
@@ -137,8 +147,8 @@ class TestCollectKnowledgeItems:
         items = _collect_knowledge_items(str(base))
 
         # Should be a relative posix path, not absolute
-        assert not Path(items[0]["source_path"]).is_absolute()
-        assert items[0]["source_path"] == "rules/test.md"
+        assert not Path(items[0].source_path).is_absolute()
+        assert items[0].source_path == "rules/test.md"
 
     def test_empty_dir_returns_empty_list(self, tmp_path: Path) -> None:
         base = _make_claude_dir(tmp_path)
@@ -154,9 +164,21 @@ class TestCollectKnowledgeItems:
 
         items = _collect_knowledge_items(str(base))
 
-        source_paths = {i["source_path"] for i in items}
+        source_paths = {i.source_path for i in items}
         assert "rules/ignore.txt" not in source_paths
         assert "rules/keep.md" in source_paths
+
+    def test_model_dump_by_alias_produces_camel_keys(self, tmp_path: Path) -> None:
+        """KnowledgeItem.model_dump(by_alias=True) produces camelCase keys for API."""
+        base = _make_claude_dir(tmp_path)
+        (base / "rules" / "test.md").write_text(_PLAIN_RULE, encoding="utf-8")
+
+        items = _collect_knowledge_items(str(base))
+        dumped = items[0].model_dump(by_alias=True)
+
+        # KnowledgeItem uses _CAMEL alias_generator; snake_case fields → camelCase
+        assert "contentHash" in dumped
+        assert "sourcePath" in dumped
 
 
 # ---------------------------------------------------------------------------
@@ -166,23 +188,23 @@ class TestCollectKnowledgeItems:
 
 class TestUploadKnowledge:
     @pytest.fixture
-    def sample_items(self) -> list[dict[str, Any]]:
+    def sample_items(self) -> list[KnowledgeItem]:
         return [
-            {
-                "type": "rule",
-                "stack": ["python"],
-                "scope": "global",
-                "title": "Python Rules",
-                "description": "Python Rules",
-                "content": _PLAIN_RULE,
-                "content_hash": hashlib.sha256(_PLAIN_RULE.encode()).hexdigest(),
-                "source_path": "rules/python.md",
-            }
+            KnowledgeItem(
+                type="rule",
+                stack=["python"],
+                scope="global",
+                title="Python Rules",
+                description="Python Rules",
+                content=_PLAIN_RULE,
+                content_hash=hashlib.sha256(_PLAIN_RULE.encode()).hexdigest(),
+                source_path="rules/python.md",
+            )
         ]
 
     @pytest.mark.asyncio
     async def test_success_returns_response_dict(
-        self, sample_items: list[dict[str, Any]]
+        self, sample_items: list[KnowledgeItem]
     ) -> None:
         mock_response = MagicMock()
         mock_response.is_success = True
@@ -204,7 +226,7 @@ class TestUploadKnowledge:
 
     @pytest.mark.asyncio
     async def test_passes_correct_payload(
-        self, sample_items: list[dict[str, Any]]
+        self, sample_items: list[KnowledgeItem]
     ) -> None:
         mock_response = MagicMock()
         mock_response.is_success = True
@@ -217,11 +239,15 @@ class TestUploadKnowledge:
         call_kwargs = mock_request.call_args
         assert call_kwargs[0][0] == "/api/knowledge/bulk"
         assert call_kwargs[1]["method"] == "POST"
-        assert call_kwargs[1]["json_body"] == {"items": sample_items}
+        # Payload must contain camelCase-serialised dicts
+        payload_items = call_kwargs[1]["json_body"]["items"]
+        assert len(payload_items) == 1
+        assert payload_items[0]["contentHash"] == sample_items[0].content_hash
+        assert payload_items[0]["sourcePath"] == sample_items[0].source_path
 
     @pytest.mark.asyncio
     async def test_401_raises_api_error(
-        self, sample_items: list[dict[str, Any]]
+        self, sample_items: list[KnowledgeItem]
     ) -> None:
         mock_response = MagicMock()
         mock_response.is_success = False
@@ -242,7 +268,7 @@ class TestUploadKnowledge:
 
     @pytest.mark.asyncio
     async def test_500_raises_api_error(
-        self, sample_items: list[dict[str, Any]]
+        self, sample_items: list[KnowledgeItem]
     ) -> None:
         mock_response = MagicMock()
         mock_response.is_success = False
@@ -263,7 +289,7 @@ class TestUploadKnowledge:
 
     @pytest.mark.asyncio
     async def test_auth_required_propagates(
-        self, sample_items: list[dict[str, Any]]
+        self, sample_items: list[KnowledgeItem]
     ) -> None:
         with (
             patch(

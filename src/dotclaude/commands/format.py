@@ -16,7 +16,7 @@ _console = Console()
 # Ordered type labels matching the collection order.
 _FILE_TYPE = Literal["agent", "rule", "skill", "command"]
 
-_TYPE_GLOBS: list[tuple[_FILE_TYPE, str]] = [
+TYPE_GLOBS: list[tuple[_FILE_TYPE, str]] = [
     ("agent", "agents/*.md"),
     ("rule", "rules/**/*.md"),
     ("skill", "skills/*/SKILL.md"),
@@ -68,7 +68,7 @@ def _collect_files(
         Ordered list of ``(file_type, path)`` pairs.
     """
     collected: list[tuple[_FILE_TYPE, Path]] = []
-    for file_type, glob_pattern in _TYPE_GLOBS:
+    for file_type, glob_pattern in TYPE_GLOBS:
         if type_filter is not None and file_type != type_filter:
             continue
         for path in sorted(base.glob(glob_pattern)):

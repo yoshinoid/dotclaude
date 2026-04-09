@@ -8,10 +8,11 @@ from pathlib import Path
 from typing import Any
 
 import typer
+from dotclaude_types.models import KnowledgeItem
 from rich.console import Console
 
 from dotclaude import __version__ as package_version
-from dotclaude.commands.format import _TYPE_GLOBS
+from dotclaude.commands.format import TYPE_GLOBS
 from dotclaude.parser import analyze
 from dotclaude.utils.api_client import ApiError, AuthRequiredError, api_request
 
@@ -19,12 +20,12 @@ _console = Console()
 sync_app = typer.Typer(name="sync", help="Sync ~/.claude usage data to the dotclaude server")
 
 
-def _collect_knowledge_items(claude_dir: str) -> list[dict[str, Any]]:
-    """Collect ~/.claude/ config files and convert to KnowledgeItem dicts.
+def _collect_knowledge_items(claude_dir: str) -> list[KnowledgeItem]:
+    """Collect ~/.claude/ config files and convert to KnowledgeItem models.
 
     For each Markdown file found under *claude_dir* (agents, rules, skills,
-    commands), reads its content and builds a knowledge item dict suitable for
-    ``POST /api/knowledge/bulk``.
+    commands), reads its content and builds a :class:`~dotclaude_types.models.KnowledgeItem`
+    suitable for ``POST /api/knowledge/bulk``.
 
     dc_-prefixed frontmatter fields are used when present; otherwise
     :func:`~dotclaude_rag.frontmatter.inference.infer_frontmatter` derives them
@@ -34,15 +35,16 @@ def _collect_knowledge_items(claude_dir: str) -> list[dict[str, Any]]:
         claude_dir: Absolute path to the ``~/.claude`` directory.
 
     Returns:
-        List of knowledge item dicts, one per collected file.
+        List of :class:`~dotclaude_types.models.KnowledgeItem` instances,
+        one per collected file.
     """
     from dotclaude_rag.frontmatter.inference import infer_frontmatter
     from dotclaude_rag.frontmatter.parser import extract_dc_fields, parse
 
     base = Path(claude_dir).expanduser().resolve()
-    items: list[dict[str, Any]] = []
+    items: list[KnowledgeItem] = []
 
-    for _file_type, glob_pattern in _TYPE_GLOBS:
+    for _file_type, glob_pattern in TYPE_GLOBS:
         for file_path in sorted(base.glob(glob_pattern)):
             if not file_path.is_file():
                 continue
@@ -60,7 +62,7 @@ def _collect_knowledge_items(claude_dir: str) -> list[dict[str, Any]]:
                 source_path = file_path.name
 
             # Parse frontmatter; use dc_ fields when available, otherwise infer.
-            metadata, body = parse(content)
+            metadata, _body = parse(content)
             fm = extract_dc_fields(metadata)
             if fm is None:
                 fm = infer_frontmatter(str(file_path), content)
@@ -68,27 +70,27 @@ def _collect_knowledge_items(claude_dir: str) -> list[dict[str, Any]]:
             content_hash = hashlib.sha256(content.encode()).hexdigest()
 
             items.append(
-                {
-                    "type": fm.dc_type,
-                    "stack": fm.dc_stack,
-                    "scope": fm.dc_scope,
-                    "title": fm.dc_description or source_path,
-                    "description": fm.dc_description,
-                    "content": content,
-                    "content_hash": content_hash,
-                    "source_path": source_path,
-                }
+                KnowledgeItem(
+                    type=fm.dc_type,
+                    stack=fm.dc_stack,
+                    scope=fm.dc_scope,
+                    title=fm.dc_description or source_path,
+                    description=fm.dc_description,
+                    content=content,
+                    content_hash=content_hash,
+                    source_path=source_path,
+                )
             )
 
     return items
 
 
-async def _upload_knowledge(items: list[dict[str, Any]]) -> dict[str, Any]:
+async def _upload_knowledge(items: list[KnowledgeItem]) -> dict[str, Any]:
     """POST /api/knowledge/bulk with the collected items.
 
     Args:
-        items: List of knowledge item dicts produced by
-            :func:`_collect_knowledge_items`.
+        items: List of :class:`~dotclaude_types.models.KnowledgeItem` instances
+            produced by :func:`_collect_knowledge_items`.
 
     Returns:
         Parsed JSON response dict from the server
@@ -101,7 +103,7 @@ async def _upload_knowledge(items: list[dict[str, Any]]) -> dict[str, Any]:
     res = await api_request(
         "/api/knowledge/bulk",
         method="POST",
-        json_body={"items": items},
+        json_body={"items": [item.model_dump(by_alias=True) for item in items]},
     )
 
     if not res.is_success:
