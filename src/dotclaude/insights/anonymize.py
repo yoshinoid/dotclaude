@@ -9,7 +9,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from dotclaude.models import DotClaudeData, InsightSignal
+from dotclaude_types.models import DotClaudeData, InsightSignal
 
 
 class GeminiPayload:

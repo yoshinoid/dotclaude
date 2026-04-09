@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from dotclaude.models import SubagentStats
+from dotclaude_types.models import SubagentStats
 from dotclaude.parser.utils import safe_json_parse
 
 

@@ -18,7 +18,7 @@ from dotclaude.insights import (
     get_gemini_api_key,
     get_system_prompt,
 )
-from dotclaude.models import (
+from dotclaude_types.models import (
     GeminiInsightsResponse,
     InsightSignal,
     Recommendation,

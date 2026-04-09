@@ -13,7 +13,7 @@ from dotclaude.display.formatters import (
     format_tokens,
     short_model,
 )
-from dotclaude.models import DotClaudeData
+from dotclaude_types.models import DotClaudeData
 
 
 def _escape_html(s: str) -> str:

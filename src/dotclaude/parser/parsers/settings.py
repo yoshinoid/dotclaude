@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from dotclaude.models import HooksStatus
+from dotclaude_types.models import HooksStatus
 from dotclaude.parser.utils import safe_json_parse
 
 

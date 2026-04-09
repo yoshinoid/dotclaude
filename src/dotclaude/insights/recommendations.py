@@ -6,7 +6,7 @@ to suggest missing agents, rules, hooks, and skills.
 
 from __future__ import annotations
 
-from dotclaude.models import (
+from dotclaude_types.models import (
     CatalogDetect,
     CatalogEntry,
     CatalogRecommendation,

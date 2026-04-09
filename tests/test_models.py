@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from dotclaude.models import (
+from dotclaude_types.models import (
     AgentsStatus,
     AnalyzeOptions,
     CacheCreation,

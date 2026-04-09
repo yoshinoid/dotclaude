@@ -11,7 +11,7 @@ from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 from dotclaude import __version__ as PACKAGE_VERSION
-from dotclaude.models import (
+from dotclaude_types.models import (
     AnalyzeOptions,
     CacheStats,
     CostByDay,
@@ -286,7 +286,7 @@ def _assign_cwd_breakdowns(
 
     Uses exact match first, then longest-prefix match for subdirectory cwds.
     """
-    from dotclaude.models import ProjectBreakdown
+    from dotclaude_types.models import ProjectBreakdown
     from dotclaude.parser.parsers.conversations import CwdAccumulator
 
     if not cwd_accumulators:
@@ -425,7 +425,7 @@ async def analyze(options_or_dir: str | AnalyzeOptions | dict[str, object] | Non
 
     tool_usage = dict(conversations.tool_usage)
 
-    from dotclaude.models import ConfigStatus
+    from dotclaude_types.models import ConfigStatus
 
     config_status = ConfigStatus(
         agents=config_partial.agents,

@@ -11,7 +11,7 @@ from typing import Any
 
 import httpx
 
-from dotclaude.models import GeminiInsightsResponse
+from dotclaude_types.models import GeminiInsightsResponse
 
 _API_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"

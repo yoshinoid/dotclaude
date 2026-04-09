@@ -6,7 +6,7 @@ All arithmetic guards against division-by-zero.
 
 from __future__ import annotations
 
-from dotclaude.models import DotClaudeData, InsightSignal
+from dotclaude_types.models import DotClaudeData, InsightSignal
 
 # Stack-extension to expected rule file mapping
 _STACK_RULE_MAP: dict[str, str] = {

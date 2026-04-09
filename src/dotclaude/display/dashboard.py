@@ -22,7 +22,7 @@ from dotclaude.display.formatters import (
     format_tokens,
     short_model,
 )
-from dotclaude.models import DotClaudeData
+from dotclaude_types.models import DotClaudeData
 
 _console = Console()
 

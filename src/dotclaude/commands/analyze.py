@@ -11,7 +11,7 @@ from rich.console import Console
 
 from dotclaude.display.dashboard import render_dashboard
 from dotclaude.display.html_report import render_html
-from dotclaude.models import AnalyzeOptions
+from dotclaude_types.models import AnalyzeOptions
 from dotclaude.parser import analyze
 
 _err_console = Console(stderr=True)

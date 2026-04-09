@@ -156,7 +156,7 @@ async def test_computes_cache_stats(claude_dir_with_data: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_applies_since_filter(claude_dir_with_data: Path) -> None:
-    from dotclaude.models import AnalyzeOptions
+    from dotclaude_types.models import AnalyzeOptions
 
     data = await analyze(AnalyzeOptions(claude_dir=str(claude_dir_with_data), since="2025-04-02"))
 
@@ -168,7 +168,7 @@ async def test_applies_since_filter(claude_dir_with_data: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_applies_until_filter(claude_dir_with_data: Path) -> None:
-    from dotclaude.models import AnalyzeOptions
+    from dotclaude_types.models import AnalyzeOptions
 
     data = await analyze(AnalyzeOptions(claude_dir=str(claude_dir_with_data), until="2025-04-01"))
 
