@@ -5,8 +5,6 @@ Ported from TypeScript: src/__tests__/insights/signals.test.ts
 
 from __future__ import annotations
 
-import pytest
-
 from dotclaude.insights.signals import detect_signals
 from dotclaude.models import DotClaudeData
 

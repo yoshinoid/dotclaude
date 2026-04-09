@@ -392,9 +392,7 @@ def parse_conversations(
                 # Apply date filters if provided
                 if filters is not None and (filters.since is not None or filters.until is not None):
                     ts: str | None = None
-                    if _is_assistant_record(record):
-                        ts = record.get("timestamp")
-                    elif _is_user_record(record):
+                    if _is_assistant_record(record) or _is_user_record(record):
                         ts = record.get("timestamp")
 
                     if ts is not None:

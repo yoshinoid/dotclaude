@@ -5,13 +5,9 @@ Ported from TypeScript: src/__tests__/cli/formatters.test.ts
 
 from __future__ import annotations
 
-import pytest
-
 from dotclaude.display.formatters import (
     format_bar,
     format_cost,
-    format_date,
-    format_duration,
     format_number,
     format_percent,
     format_seconds,

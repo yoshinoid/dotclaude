@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 
@@ -30,12 +30,12 @@ app.add_typer(serve_app, name="serve")
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context = typer.Context,
-    path: Annotated[Optional[str], typer.Option("--path", help="Custom path to ~/.claude directory")] = None,
+    path: Annotated[str | None, typer.Option("--path", help="Custom path to ~/.claude directory")] = None,
     json_output: Annotated[bool, typer.Option("--json", help="Output raw JSON instead of the dashboard")] = False,
-    since: Annotated[Optional[str], typer.Option("--since", help="Include only records on or after this date (YYYY-MM-DD)")] = None,
-    until: Annotated[Optional[str], typer.Option("--until", help="Include only records on or before this date (YYYY-MM-DD)")] = None,
-    top: Annotated[Optional[int], typer.Option("--top", help="Max items per section")] = None,
-    html: Annotated[Optional[str], typer.Option("--html", help="Export report as HTML file")] = None,
+    since: Annotated[str | None, typer.Option("--since", help="Include only records on or after this date (YYYY-MM-DD)")] = None,
+    until: Annotated[str | None, typer.Option("--until", help="Include only records on or before this date (YYYY-MM-DD)")] = None,
+    top: Annotated[int | None, typer.Option("--top", help="Max items per section")] = None,
+    html: Annotated[str | None, typer.Option("--html", help="Export report as HTML file")] = None,
     insights: Annotated[bool, typer.Option("--insights", help="Analyze usage patterns with AI")] = False,
     evolve: Annotated[bool, typer.Option("--evolve", help="Suggest missing agents, rules, and hooks")] = False,
     version: Annotated[bool, typer.Option("--version", "-v", help="Show version")] = False,

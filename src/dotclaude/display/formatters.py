@@ -6,7 +6,7 @@ All functions handle 0/null/undefined gracefully.
 from __future__ import annotations
 
 import math
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 
 def format_number(n: int | float) -> str:
@@ -46,7 +46,7 @@ def format_date(iso: str) -> str:
     Example: format_date("2025-04-06T...") => "2d ago"
     Example: format_date("2025-04-08T...") => "today"
     """
-    epoch_iso = datetime.fromtimestamp(0, tz=timezone.utc).isoformat()
+    epoch_iso = datetime.fromtimestamp(0, tz=UTC).isoformat()
     if not iso or iso == epoch_iso:
         return "\u2014"
 
@@ -164,7 +164,7 @@ def format_duration(start_iso: str, end_iso: str) -> str:
 
     Example: format_duration("2025-03-24T...", "2025-04-08T...") => "Mar 24 \u2013 Apr 8"
     """
-    epoch_iso = datetime.fromtimestamp(0, tz=timezone.utc).isoformat()
+    epoch_iso = datetime.fromtimestamp(0, tz=UTC).isoformat()
     if not start_iso or start_iso == epoch_iso or not end_iso or end_iso == epoch_iso:
         return "\u2014"
 

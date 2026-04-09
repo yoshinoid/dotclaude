@@ -7,9 +7,10 @@ Public API:
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
+from dotclaude import __version__ as PACKAGE_VERSION
 from dotclaude.models import (
     AnalyzeOptions,
     CacheStats,
@@ -39,8 +40,6 @@ from dotclaude.parser.parsers.settings import RawHookDefinition
 from dotclaude.parser.parsers.subagents import parse_subagents
 from dotclaude.parser.scanner import scan_claude_dir
 from dotclaude.parser.utils import get_claude_dir, normalize_cwd
-
-from dotclaude import __version__ as PACKAGE_VERSION
 
 __all__ = [
     "analyze",
@@ -129,7 +128,7 @@ def _build_summary_stats(
 ) -> SummaryStats:
     """Build SummaryStats from conversations parse result and other data."""
     days_active = sum(1 for d in daily_activity if d.prompts > 0 or d.sessions > 0)
-    epoch_iso = datetime.fromtimestamp(0, tz=timezone.utc).isoformat()
+    epoch_iso = datetime.fromtimestamp(0, tz=UTC).isoformat()
 
     return SummaryStats(
         total_sessions=total_sessions,
@@ -287,8 +286,8 @@ def _assign_cwd_breakdowns(
 
     Uses exact match first, then longest-prefix match for subdirectory cwds.
     """
-    from dotclaude.parser.parsers.conversations import CwdAccumulator
     from dotclaude.models import ProjectBreakdown
+    from dotclaude.parser.parsers.conversations import CwdAccumulator
 
     if not cwd_accumulators:
         return
@@ -465,7 +464,7 @@ async def analyze(options_or_dir: str | AnalyzeOptions | dict[str, object] | Non
     return DotClaudeData(
         meta=DotClaudeMeta(
             claude_dir=resolved_dir,
-            scanned_at=datetime.now(tz=timezone.utc).isoformat(),
+            scanned_at=datetime.now(tz=UTC).isoformat(),
             version=PACKAGE_VERSION,
             filters=filters,
         ),

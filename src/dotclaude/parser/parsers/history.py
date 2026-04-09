@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -15,7 +15,7 @@ def _is_record(value: Any) -> bool:
 
 def _timestamp_to_date(ts: float) -> str:
     """Convert a millisecond epoch timestamp to a YYYY-MM-DD string."""
-    return datetime.fromtimestamp(ts / 1000.0, tz=timezone.utc).strftime("%Y-%m-%d")
+    return datetime.fromtimestamp(ts / 1000.0, tz=UTC).strftime("%Y-%m-%d")
 
 
 def parse_history(history_file: str) -> dict[str, Any]:

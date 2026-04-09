@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -94,8 +94,8 @@ def _get_last_modified(directory: Path) -> str:
 
     walk(directory)
     if latest > 0:
-        return datetime.fromtimestamp(latest, tz=timezone.utc).isoformat()
-    return datetime.fromtimestamp(0, tz=timezone.utc).isoformat()
+        return datetime.fromtimestamp(latest, tz=UTC).isoformat()
+    return datetime.fromtimestamp(0, tz=UTC).isoformat()
 
 
 def _count_jsonl_files(directory: Path) -> int:

@@ -6,14 +6,11 @@ Ported from TypeScript: src/__tests__/parser/analyze.test.ts
 from __future__ import annotations
 
 import json
-import os
-import tempfile
 from pathlib import Path
 
 import pytest
 
 from dotclaude.parser import analyze
-
 
 # ---------------------------------------------------------------------------
 # Helpers
