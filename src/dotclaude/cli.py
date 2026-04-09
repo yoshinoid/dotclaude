@@ -12,6 +12,7 @@ from dotclaude.commands.login import login_app
 from dotclaude.commands.register import register_app
 from dotclaude.commands.serve import serve_app
 from dotclaude.commands.sync import sync_app
+from dotclaude.commands.team import team_app
 
 app = typer.Typer(
     name="dotclaude",
@@ -25,6 +26,7 @@ app.add_typer(login_app, name="login")
 app.add_typer(register_app, name="register")
 app.add_typer(sync_app, name="sync")
 app.add_typer(serve_app, name="serve")
+app.add_typer(team_app, name="team")
 
 
 @app.command(name="format")
