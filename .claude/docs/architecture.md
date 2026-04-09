@@ -1,5 +1,5 @@
 # dotclaude CLI — Architecture
-> Updated: 2026-04-09 | Stack: Python 3.11+, Typer, Rich, Pydantic v2, httpx
+> Updated: 2026-04-09 | Phase 1-3 완료 | Stack: Python 3.11+, Typer, Rich, Pydantic v2, httpx
 
 ## System Overview
 ```
@@ -34,11 +34,14 @@ src/dotclaude/
 ├── models.py               Re-export shim → dotclaude_types.models
 ├── commands/
 │   ├── analyze.py          Main analysis command (--json, --html, --serve)
-│   ├── insights.py         AI insights (local signals + Gemini)
+│   ├── insights.py         AI insights + --evolve (서버+로컬 추천 병합)
 │   ├── config.py           API key management
 │   ├── login.py            Server auth (JWT)
 │   ├── register.py         Server account creation
-│   ├── sync.py             Upload snapshot to server
+│   ├── sync.py             Upload snapshot + knowledge (Phase 1 확장)
+│   ├── format.py           Phase 1: dc_ frontmatter 자동 적용
+│   ├── team.py             Phase 3a: create/join/leave/list
+│   ├── pull.py             Phase 3b: pull + workflow (approve/reject/status)
 │   └── serve.py            Local HTTP dashboard server
 ├── parser/
 │   ├── __init__.py         analyze() → DotClaudeData (public API)
@@ -54,11 +57,15 @@ src/dotclaude/
 │       ├── subagents.py      subagent .meta.json
 │       └── process_sessions.py  session PIDs, durations
 ├── insights/
-│   ├── signals.py          Rule-based signal detection (thresholds)
-│   ├── recommendations.py  Catalog-based config suggestions
+│   ├── signals.py          Rule-based signal detection (레거시 — rag로 이전 예정)
+│   ├── recommendations.py  Catalog-based config suggestions (로컬 폴백)
+│   ├── server_recommendations.py  서버 추천 API fetch (Phase 2)
+│   ├── merge.py            서버 + 로컬 추천 병합 (title+type dedup, max 7)
 │   ├── gemini.py           Gemini API client for AI insights
 │   ├── anonymize.py        Strip PII before sending to Gemini
 │   └── config_store.py     Gemini API key persistence
+├── utils/
+│   └── file_writer.py      Phase 3b: safe_write (path traversal 방지 + .bak)
 └── display/
     ├── dashboard.py        Rich terminal dashboard
     ├── html_report.py      Self-contained HTML report
@@ -83,8 +90,9 @@ src/dotclaude/
 ## External Connections
 | Service | When | Auth |
 |---------|------|------|
-| dotclaude-server | `sync`, `login`, `register` | JWT (access + refresh) |
+| dotclaude-server | `sync`, `login`, `register`, `team`, `pull`, `--evolve` | JWT (access + refresh) |
 | Gemini API | `insights --ai` | API key in ~/.config/dotclaude/ |
+| dotclaude-rag | `format`, `sync` (frontmatter 처리) | 패키지 의존성 |
 
 ## Gotchas
 - JSONL files can be very large (100MB+) — streaming parser, never load full file
