@@ -18,9 +18,9 @@ q3_spec_ref: 2026-04-10-dotclaude-plugin-nucleus-architecture.md
 
 Q3 에서 dotclaude 의 핵심 아키텍처(Plug-in Nucleus, EvolvePlugin, Tier 시스템, Later DB)가 확정됐다. Q4 는 그 다음 자연스러운 질문에 답한다:
 
-> "dotclaude 라는 Claude Code setup 엔진이 yoshinoid 라는 인디 개발 랩에서 어떤 역할을 해야 하는가?"
+> "dotclaude 라는 Claude Code setup 엔진이 yoshinoid 에서 어떤 역할을 해야 하는가?"
 
-같은 "evolve" 동사가 dotclaude 스케일(Claude Code setup 진화)과 yoshinoid 스케일(indie dev lab 진화)에서 fractal 하게 작동한다. 이 fractal 포지셔닝을 구조화하고, `dotclaude-core` 의 yoshinoid 공용화 시점·방식, `dotclaude.self` scope 확장, 회사 관계 3-layer, 지속 가능 운영 모델을 결정한다.
+같은 "evolve" 동사가 dotclaude 스케일(Claude Code setup 진화)과 yoshinoid 스케일에서 fractal 하게 작동한다. 이 fractal 포지셔닝을 구조화하고, `dotclaude-core` 의 yoshinoid 공용화 시점·방식, `dotclaude.self` scope 확장, 회사 관계 3-layer, 지속 가능 운영 모델을 결정한다.
 
 **전제 (Q3 spec 으로부터 불변):**
 - Python 3.11+ 런타임, Claude Code 가 주 실행 환경
@@ -114,7 +114,7 @@ dotclaude-core → kernel evolving
 plug-ins     → domain evolving
 ```
 
-이 구조가 yoshinoid 의 고유 포지셔닝을 만든다: 단순한 도구가 아니라 "진화하는 인디 개발 랩의 자기 진화 엔진".
+이 구조가 yoshinoid 의 고유 포지셔닝을 만든다: 단순한 도구가 아니라 "yoshinoid 의 자기 진화 엔진".
 
 ## 6. Extract-After-Two-Uses 룰
 
@@ -424,3 +424,4 @@ yoshinoid Phase 0 작업 (15% 비중):
 | 날짜 | 버전 | 변경 | 이유 |
 |---|---|---|---|
 | 2026-04-10 | 1 | 초안 생성 (self-evolver Q4 24-loop 수렴 결과) | Q3 spec 이후 yoshinoid 전략 영구 기록 |
+| 2026-04-10 | 1.1 | §1, §5 문구 정리 | 사용자 요청 — 아키텍처 결정 변화 없음 |
