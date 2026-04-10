@@ -454,21 +454,22 @@ dotclaude-usage/
 | 날짜 | 버전 | 변경 | 이유 |
 |---|---|---|---|
 | 2026-04-10 | 1 | 초안 생성 (self-evolver Q3 25-loop 수렴 결과 spec 화) | 사용자 승인 ("가자!") |
+| 2026-04-11 | 1.1 | dotclaude-core Phase 0 구현 범위 한정으로 **Plugin → Extension naming rename note** | Phase 0 implementation plan v2 (planner Round 2 + critic Round 2 CONDITIONAL APPROVAL) 에서 기존 `dotclaude/src/dotclaude/parser/parsers/plugins.py:PluginsStatus` (Claude Code marketplace plug-in 파싱) 와 어휘 격리 필요. dotclaude-core 구현에서: `EvolvePlugin` Protocol → `EvolveExtension`, `plugin.toml` → `extension.toml`, `loader.py` → `extension_loader.py`, `registry.py` → `extension_registry.py`. **본 spec 본문 (T1-T14, §4 등) 의 "Plugin / plug-in" 단어는 미변경** — Q3 spec 의 전면 rename 은 별도 patch 로 다룸. 이 행은 dotclaude-core Phase 0 구현 범위에 한정된 alias note. |
 
 ---
 
 ## References
 
 ### 메모리 파일
-- `~/.claude/projects/c--Users-jeong-projects-dotclaude/memory/user_dotclaude_q3_architecture_intent_anchor.md` — **Phase 1 앵커 8개 + 근거** (이 spec 의 결정 근거)
-- `~/.claude/projects/c--Users-jeong-projects-dotclaude/memory/user_dotclaude_keywords.md` — 7 키워드 4 계층 (🧬🛰️🐝📊🏰🧲🎯🧭)
-- `~/.claude/projects/c--Users-jeong-projects-dotclaude/memory/user_ai_orchestration_role.md` — AI 오케스트레이션 렌즈 (★ 중요도 최상)
-- `~/.claude/projects/c--Users-jeong-projects-dotclaude/memory/user_identity_vision.md` — 개발자 아이덴티티 7축 + 목표함수
-- `~/.claude/projects/c--Users-jeong-projects-dotclaude/memory/project_dotclaude_state.md` — dotclaude 5 레포 현황 + Q3 Architecture 대기 맥락
+- `~/.claude/projects/C--Users-jeong-projects-yoshinoid/memory/user_dotclaude_q3_architecture_intent_anchor.md` — **Phase 1 앵커 8개 + 근거** (이 spec 의 결정 근거)
+- `~/.claude/projects/C--Users-jeong-projects-yoshinoid/memory/user_dotclaude_keywords.md` — 7 키워드 4 계층 (🧬🛰️🐝📊🏰🧲🎯🧭)
+- `~/.claude/projects/C--Users-jeong-projects-yoshinoid/memory/user_ai_orchestration_role.md` — AI 오케스트레이션 렌즈 (★ 중요도 최상)
+- `~/.claude/projects/C--Users-jeong-projects-yoshinoid/memory/user_identity_vision.md` — 개발자 아이덴티티 7축 + 목표함수
+- `~/.claude/projects/C--Users-jeong-projects-yoshinoid/memory/project_dotclaude_state.md` — dotclaude 5 레포 현황 + Q3 Architecture 대기 맥락
 
 ### 연결 문서
 - `~/.claude/docs/later.md` — Deferred (self-evolver) 섹션: Q1-Q3 미결 항목
-- `C:\Users\jeong\projects\dotclaude\dotclaude-rag\.claude\docs\specs\2026-04-09-phase1-knowledge-pipeline.md` — RAG phase1 spec (형식 참조)
+- `C:\Users\jeong\projects\yoshinoid\dotclaude-rag\.claude\docs\specs\2026-04-09-phase1-knowledge-pipeline.md` — RAG phase1 spec (형식 참조)
 
 ### 브레인스토밍 세션 메타
 - **세션 날짜**: 2026-04-10

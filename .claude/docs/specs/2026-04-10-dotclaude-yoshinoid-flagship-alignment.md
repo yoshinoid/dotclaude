@@ -102,6 +102,14 @@ yoshinoid/
 
 **ideas/ 승격 기준**: 10건 이상 축적 시 독립 레포 검토. 현재 폴더로 시작 (Premature abstraction 방지).
 
+> **Disambiguation (2026-04-11, yoshinoid Phase 0 spec v2 §16 연계)**:
+> `yoshinoid` 라는 이름은 본 spec 에서는 **identity-layer** (브랜드/레포 계층) 을
+> 가리킨다. Phase 0 meta-agent spec §16 에서는 동일 이름이 **meta-agent family
+> 의 kernel** 로 재사용된다. 두 스코프는 fractal 정합이지만 참조 시 레이어를
+> 명확히 구분해야 한다:
+> - `yoshinoid` (identity-layer) — 본 spec §4, 사용자·레포·프로젝트 우산
+> - `yoshinoid` (meta-agent kernel) — `2026-04-10-yoshinoid-meta-agent-phase-0.md` §16, 4 lens (secretary/career/idea-manager) 의 중앙 kernel
+
 ## 5. Fractal 포지셔닝 — 5층 Evolving
 
 같은 "evolve" 동사가 계층마다 fractal 하게 반복된다:
@@ -425,3 +433,4 @@ yoshinoid Phase 0 작업 (15% 비중):
 |---|---|---|---|
 | 2026-04-10 | 1 | 초안 생성 (self-evolver Q4 24-loop 수렴 결과) | Q3 spec 이후 yoshinoid 전략 영구 기록 |
 | 2026-04-10 | 1.1 | §1, §5 문구 정리 | 사용자 요청 — 아키텍처 결정 변화 없음 |
+| 2026-04-11 | 1.2 | §4 끝에 disambiguation note 추가 | yoshinoid Phase 0 spec v2 §16 family kernel reframe 과의 이름 충돌 방지 (critic F2). 본 spec 의 아키텍처 결정 변화 없음, 참조 가이드 1개 추가만. |
