@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -194,11 +195,9 @@ def _parse_workflow_items(output_data: dict[str, Any]) -> list[PullItem]:
     raw_items: list[Any] = output_data.get("items", [])
     result: list[PullItem] = []
     for raw in raw_items:
-        try:
+        # Skip items that cannot be parsed rather than aborting entirely.
+        with contextlib.suppress(Exception):
             result.append(PullItem.model_validate(raw))
-        except Exception:
-            # Skip items that cannot be parsed rather than aborting entirely.
-            pass
     return result
 
 
