@@ -1,22 +1,44 @@
 ---
 title: yoshinoid Meta-Agent Phase 0 Thin Slice
 date: 2026-04-10
-status: approved (v2.1 — Track 1 Done criteria added, plan ready)
-version: 2.1
+status: approved (v2.2 — 2026-04-11 late rename cascade terminology note 추가. content 는 historical preserve)
+version: 2.2
 id: 2026-04-10-yoshinoid-meta-agent-phase-0
 owner: jeonghwan-hwang (yoshinoid)
-source: self-evolver-brainstorm (v1: 25 loops; v2: 14 loops family reframe) + critic (CONDITIONAL APPROVAL) + internet-research (5 sources)
+source: self-evolver-brainstorm (v1: 25 loops; v2: 14 loops family reframe) + critic (CONDITIONAL APPROVAL) + internet-research (5 sources) + 2026-04-11 knowledge rename cascade terminology integration (v2.2)
 related_specs:
-  - 2026-04-10-dotclaude-plugin-nucleus-architecture.md
+  - 2026-04-10-dotclaude-plugin-nucleus-architecture.md (v1.2 — terminology note 추가됨)
   - 2026-04-10-dotclaude-yoshinoid-flagship-alignment.md
+  - 2026-04-11-yoshinoid-phase-0-implementation-plan.md (v1.3 — T6 knowledge_store 통합)
+  - 2026-04-11-knowledge-store-separation-and-rename-cascade.md (v1 — rename cascade canonical spec)
 related_rules:
   - ~/.claude/rules/agent-skill-creation.md
+  - ~/.claude/rules/knowledge.md (구 logbook.md, v3 rewrite)
 related_docs:
-  - ~/.claude/docs/later.md (★★ yoshinoid 섹션)
+  - ~/.claude/knowledge/working/later.md (★★ yoshinoid 섹션, 2026-04-11 rename 이후 경로)
   - ~/.claude/projects/c--Users-jeong-projects-yoshinoid/memory/project_meta_agent_family.md
+  - ~/.claude/projects/c--Users-jeong-projects-yoshinoid/memory/user_knowledge_store_separation_intent_anchor.md (★ intent lock)
 ---
 
 # Spec: yoshinoid Meta-Agent Phase 0 Thin Slice
+
+---
+
+## 0. Terminology note (v2.2, 2026-04-11 rename cascade)
+
+2026-04-11 late 에 **logbook → knowledge** 원자적 rename cascade 가 실행됨 (spec `2026-04-11-knowledge-store-separation-and-rename-cascade.md`). 본 spec 의 기존 "logbook" / "`~/.claude/docs/`" 참조는 다음과 같이 읽어야 함:
+
+- `yoshinoid/logbook` repo → `yoshinoid/knowledge` repo
+- `~/.claude/rules/logbook.md` → `~/.claude/rules/knowledge.md`
+- `~/.claude/docs/later.md` → `~/.claude/knowledge/working/later.md`
+- `~/.claude/docs/ideas.md` → `~/.claude/knowledge/working/ideas.md`
+- `~/.claude/docs/research.md` → `~/.claude/knowledge/working/research.md`
+- `~/.claude/docs/` (전역 working set) → `~/.claude/knowledge/working/` (local) + `yoshinoid/knowledge` (remote)
+- §7.2 C7b 의 "logbook repo" 언급 → "**knowledge repo** (`~/.claude/knowledge/` local + `yoshinoid/knowledge` remote)"
+- §5 "brand 파일" 의 `~/.claude/docs/` → `~/.claude/knowledge/` 내부 (manifesto.md 등)
+- §17 lens primary owner 경로의 `~/.claude/docs/ideas.md` → `~/.claude/knowledge/working/ideas.md`
+
+본문은 **content 보존 원칙**에 따라 수정하지 않음. 독자는 이 terminology note 와 함께 읽을 것. 현재 canonical 은 `2026-04-11-knowledge-store-separation-and-rename-cascade.md`.
 
 ---
 

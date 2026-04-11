@@ -1,13 +1,32 @@
 ---
 title: dotclaude Plug-in Nucleus Architecture (Q3 수렴)
 date: 2026-04-10
-status: approved
-version: 1
-source: self-evolver-2026-04-10-q3 (25 loops, partial-max)
+status: approved (v1.2 — 2026-04-11 late rename cascade terminology note 추가. content 는 historical preserve)
+version: 1.2
+source: self-evolver-2026-04-10-q3 (25 loops, partial-max) + 2026-04-11 Extension rename note (v1.1) + 2026-04-11 late knowledge rename cascade terminology (v1.2)
 anchor_ref: user_dotclaude_q3_architecture_intent_anchor.md
+related_specs:
+  - 2026-04-11-knowledge-store-separation-and-rename-cascade.md (v1 — rename cascade canonical)
+  - 2026-04-11-yoshinoid-phase-0-implementation-plan.md (v1.3 — T6 knowledge_store 통합)
 ---
 
 # Spec: dotclaude Plug-in Nucleus Architecture (Q3 수렴)
+
+## 0. Terminology note (v1.2, 2026-04-11 rename cascade)
+
+2026-04-11 late 에 **logbook → knowledge** 원자적 rename cascade 가 실행됨. 본 spec 의 기존 `~/.claude/docs/` 참조는 다음과 같이 읽어야 함:
+
+- `~/.claude/docs/later.md` → `~/.claude/knowledge/working/later.md`
+- `~/.claude/docs/research.md` → `~/.claude/knowledge/working/research.md`
+- `~/.claude/docs/ideas.md` → `~/.claude/knowledge/working/ideas.md`
+- `~/.claude/docs/reports/**` (§5 example write_paths) → `~/.claude/knowledge/reports/**` 또는 project-local
+- §15 Deferred (self-evolver) 의 `~/.claude/docs/later.md` → `~/.claude/knowledge/working/later.md`
+
+**Plugin → Extension rename note (v1.1, 2026-04-11)**: 본 spec 에서 `EvolvePlugin` 로 등장하는 Protocol 이름은 namespace 충돌 회피를 위해 `EvolveExtension` 으로 rename 되었음. 상세: `2026-04-11-yoshinoid-phase-0-implementation-plan.md` §1.
+
+본문은 content 보존 원칙에 따라 수정하지 않음. 독자는 이 terminology note 와 함께 읽을 것. 현재 canonical rename spec: `2026-04-11-knowledge-store-separation-and-rename-cascade.md`.
+
+---
 
 ## 1. 목표
 

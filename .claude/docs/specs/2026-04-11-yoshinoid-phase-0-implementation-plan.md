@@ -2,24 +2,41 @@
 title: yoshinoid Phase 0 Implementation Plan (planner v2 + critic Round 2 CONDITIONAL APPROVAL)
 date: 2026-04-11
 status: approved (CONDITIONAL — 4 trivial fixes inlined; ready for implementation entry)
-version: 1
+version: 1.3
 id: 2026-04-11-yoshinoid-phase-0-implementation-plan
 owner: jeonghwan-hwang (yoshinoid)
-source: planner Round 1 + critic Round 1 (NEEDS REVISION) + planner Round 2 + critic Round 2 (CONDITIONAL APPROVAL, 4 inline fixes applied)
+source: planner Round 1 + critic Round 1 (NEEDS REVISION) + planner Round 2 + critic Round 2 (CONDITIONAL APPROVAL, 4 inline fixes applied) + 2026-04-11 knowledge store rename spec integration (v1.3)
 related_specs:
   - 2026-04-10-yoshinoid-meta-agent-phase-0.md (v2.1 — §7.2 Track 1 Done criteria 추가됨)
   - 2026-04-10-dotclaude-plugin-nucleus-architecture.md (v1.1 — Extension rename note 추가됨)
   - 2026-04-10-dotclaude-yoshinoid-flagship-alignment.md (v1.2)
+  - 2026-04-11-knowledge-store-separation-and-rename-cascade.md (v1 — T6 scope 확장 근거, logbook → knowledge rename)
 related_rules:
   - ~/.claude/rules/agent-skill-creation.md
+  - ~/.claude/rules/knowledge.md (구 logbook.md, v3 rewrite 예정)
 related_docs:
-  - ~/.claude/docs/later.md (★★★ Phase 0 실행 계획)
+  - ~/.claude/knowledge/working/later.md (★★★ Phase 0 실행 계획) — 구 경로 `~/.claude/docs/later.md` 는 rename cascade 후 폐기
   - ~/.claude/projects/c--Users-jeong-projects-yoshinoid/memory/project_meta_agent_family.md
+  - ~/.claude/projects/c--Users-jeong-projects-yoshinoid/memory/user_knowledge_store_separation_intent_anchor.md (★ intent lock)
 ---
 
 # Spec: yoshinoid Phase 0 Implementation Plan
 
 이 spec 은 Phase 0 spec v2.1 의 Done criteria (Track 1 C7-C11 + Track 2 C1-C6) 을 달성하기 위한 **구현 계획서** 다. plan ↔ spec 분리: Phase 0 spec 은 "무엇을 만드는가", 본 spec 은 "어떻게/순서/검증". planner 2 round + critic 2 round 를 거쳐 CONDITIONAL APPROVAL 로 진입 ready 상태.
+
+---
+
+## 0. Terminology note (v1.3, 2026-04-11 rename cascade)
+
+2026-04-11 late 에 **logbook → knowledge** 원자적 rename cascade 가 실행됨 (spec `2026-04-11-knowledge-store-separation-and-rename-cascade.md`). 본 plan spec 의 기존 "logbook" 참조는 다음과 같이 읽어야 함:
+
+- `yoshinoid/logbook` repo → `yoshinoid/knowledge` repo
+- `~/.claude/rules/logbook.md` → `~/.claude/rules/knowledge.md`
+- `project_logbook_operation_plan.md` memory → `project_knowledge_operation_plan.md`
+- Phase 0 spec §7.2 C7b 의 "logbook repo 또는 `dotclaude-core/.local/`" → "**knowledge repo** (`~/.claude/knowledge/` + `yoshinoid/knowledge` remote) 또는 `dotclaude-core/.local/`"
+- `~/.claude/docs/later.md` → `~/.claude/knowledge/working/later.md` (Q-b 경로 update)
+
+2026-04-10 spec (`2026-04-10-yoshinoid-meta-agent-phase-0.md` v2.1) 의 "logbook" 언급은 **historical preserve** — 당시 결정 기록. 새 spec 이 canonical.
 
 ---
 
@@ -149,9 +166,9 @@ fail 시 **수동 fix** (자동 rollback 금지 — 위험).
 | **T3** | classify_path.py + Windows normalization | `dotclaude_core/classify_path.py`, `config.py` | T2 | (P0-2) `pathlib.PurePosixPath(str(p).replace('\\\\', '/'))` 강제. Tier 3 patterns: `.env*, *.pem, *_secret*, *_key*, .git/config`. **Windows 경로 케이스 8+** (`c:\\Users\\x\\.env`, `C:/x/secret.key`, mixed backslash, UNC `\\\\server\\share\\.env`, symlink → `.env`, etc) → POSIX 결과와 동일성 assertion |
 | **T10a** | safety/permissions.py — manifest write_paths matcher | `dotclaude_core/safety/permissions.py` | T2 | (P0-3 split, T4 의 before) glob expansion. 단위 테스트 분해: Tier1 ≥4, Tier2 ≥4, Tier3 ≥6, negative ≥4 (P2-a, 총 18+) |
 | **T4** | write_gateway.py | `dotclaude_core/write_gateway.py` | T3, T10a | Tier 0 immediate, Tier 1 staged, Tier 2 later_store pending, **Tier 3 reject**. 커버리지 ≥ 95% |
-| **T5** | git_ops.py | `dotclaude_core/git_ops.py` | T1 | `branch, commit, diff, revert, current_branch, dirty_check`. subprocess wrapper. tmp git repo fixture 검증 |
+| **T5** | git_ops.py | `dotclaude_core/git_ops.py` | T1 | `branch, commit, diff, revert, current_branch, dirty_check`. subprocess wrapper. tmp git repo fixture 검증. **v1.3 추가**: `commit_atomic(paths: list[Path], message: str) -> str` helper — T6 `knowledge_store.write_session_close` 의 single-commit invariant 를 구현 |
 | **T7** | event_bus.py | `dotclaude_core/event_bus.py` | T1 | asyncio.Queue 기반. publish/subscribe. fan-out 테스트. **redis adapter Protocol stub only** (Phase 0.5 본구현) |
-| **T6** | later_store.py | `dotclaude_core/later_store.py`, `kv_store.py` | T1, T7 | sqlite schema (Q3 §4.7). status 전환 시 `event_bus.publish("later.status_changed")`. WAL mode (Windows 시 `journal_mode=DELETE` fallback). **단일 파일 `dotclaude.sqlite`** (kv 와 share, 분리 테이블) |
+| **T6** | later_store.py + kv_store.py + **knowledge_store.py** (v1.3 확장) | `dotclaude_core/later_store.py`, `kv_store.py`, `stores/knowledge_store.py` | T1, T5, T7 | sqlite schema (Q3 §4.7). status 전환 시 `event_bus.publish("later.status_changed")`. WAL mode (Windows 시 `journal_mode=DELETE` fallback). **단일 파일 `dotclaude.sqlite`** (kv 와 share, 분리 테이블). **knowledge_store 추가 (v1.3)**: path resolution (`~/.claude/knowledge/`), `EntryFrontmatter` pydantic schema (type/date/slug/session_index/topics/impact/public_safe/working_set_delta/handoff_ref/correction_of/version), validator, 8-section renderer, `dotclaude knowledge init` CLI helper, **single-commit invariant** (`write_session_close` 는 entry file + working set deltas 를 하나의 git commit 에 stage, T5 `git_ops.commit_atomic` helper 의존). 3 모듈 (`later_store`, `kv_store`, `knowledge_store`) 가 `working/` 디렉토리 공유. 상세 API: 2026-04-11-knowledge-store-separation-and-rename-cascade §4.4. 예상 effort +~2 days |
 | **T8** | extension_loader.py + extension_registry.py | `dotclaude_core/{extension_loader.py, extension_registry.py}` | T2 | `tomllib` parse → schema validate → entry import → instantiate. duplicate name reject |
 | **T9** | evolve_kernel.py | `dotclaude_core/evolve_kernel.py` | T4, T6, T7, T8 | scan → propose → dry_merge → apply. 충돌 시 둘 다 Tier 2 escalate |
 | **T10b** | safety/file_lock.py + sandbox.py | `dotclaude_core/safety/{file_lock.py, sandbox.py}` | T4 | file_lock: mtime + git-dirty. sandbox: asyncio timeout + posix `resource` (windows = pragma). `# pragma: no cover` 허용 (P1-3) |
@@ -207,9 +224,9 @@ TS-1 ✅ → TS-2 ✅ → T1 → T2 → T3 → T10a → T4 → T9 → T13 → V
 | # | Q | 결정 | Status |
 |---|---|---|---|
 | Q-a | event_bus 구현체 | asyncio.Queue 내장 + redis adapter Protocol stub | resolved |
-| Q-b | later.md 경로 | `~/.claude/docs/later.md` 고정 | resolved |
+| Q-b | later.md 경로 | **v1.3 update**: `~/.claude/knowledge/working/later.md` (구 `~/.claude/docs/later.md` 는 rename cascade 후 폐기) | resolved (2026-04-11 rename) |
 | Q-c | kv_store + later_store sqlite 분리 | 단일 파일 `dotclaude.sqlite` | resolved |
-| Q-d | Tier 1 auto-commit production target | Phase 0 = tmp E2E (C7a). production = Phase 0.5 logbook (C7b, 7-day trigger) | resolved (autonomous) |
+| Q-d | Tier 1 auto-commit production target | Phase 0 = tmp E2E (C7a). production = Phase 0.5 **knowledge** (구 logbook) repo (C7b, 7-day trigger). `~/.claude/knowledge/` local + `yoshinoid/knowledge` remote | resolved (autonomous) + v1.3 rename |
 | Q-e | dotclaude-usage 별 레포 vs sub-folder | 별 디렉토리 (`dotclaude-usage/`) | resolved |
 | Q-f | coverage 목표 | 핵심 95% / 전체 75% | resolved (P1-3) |
 | Q-g | writer hook validator bash vs python | Python resolver inline (P0-4) | resolved |
@@ -291,3 +308,4 @@ grep -c 'corrections_count: [1-9]' ~/.claude/memory/yoshinoid_state.md
 | 2026-04-11 | 1 | 초안 생성 (planner v2 + critic Round 2 CONDITIONAL APPROVAL, 4 fix inline) | Phase 0 implementation entry 전 plan 영구 기록 |
 | 2026-04-11 | 1.1 | Q-h resolved (extension.toml 유지, research.md link) + Q-i resolved (T14 Phase 1 defer, task/critical path strikethrough) | 첫 액션 전 미결 질문 해소 → T1 진입 ready |
 | 2026-04-11 | 1.2 | §1 ripgrep gate allowlist 확장 (.venv/.pytest_cache/.git/build/dist/*.egg-info) + markdown `<!-- allow-plugin-word -->` 마커 허용 + docstring rewording 규칙 명시 | T1-T3 구현 후 발견: build/runtime 산출물이 false positive 유발, docstring 내부 단어는 line-level marker 로 exempt 불가 |
+| 2026-04-11 | 1.3 | §0 terminology note (knowledge rename) 추가 / T6 확장 (`knowledge_store.py` + `dotclaude knowledge init` + single-commit invariant + pydantic `EntryFrontmatter` schema) / T5 에 `commit_atomic` helper 추가 / Q-b 경로 갱신 (~/.claude/docs/later.md → ~/.claude/knowledge/working/later.md) / Q-d production target 용어 갱신 (logbook → knowledge) / related_specs·rules·docs frontmatter 갱신 | 2026-04-11 late SEB 3차 수렴 결과 반영. Spec `2026-04-11-knowledge-store-separation-and-rename-cascade` 와 cross-reference. T6 예상 effort +~2 days. 기존 logbook 명명은 2026-04-10 v2.1 spec 에서 historical preserve |
