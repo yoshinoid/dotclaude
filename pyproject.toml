@@ -43,6 +43,12 @@ dev = [
     "mypy>=1.10",
     "ruff>=0.5",
 ]
+knowledge = ["dotclaude-core>=0.1.0"]
+
+[tool.uv.sources]
+dotclaude-core = { path = "../dotclaude-core", editable = true }
+dotclaude-types = { path = "../dotclaude-types", editable = true }
+dotclaude-rag = { path = "../dotclaude-rag", editable = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dotclaude"]
