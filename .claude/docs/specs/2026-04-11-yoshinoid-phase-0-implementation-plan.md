@@ -27,7 +27,7 @@ related_docs:
 
 dotclaude-core 의 module 시스템은 **`Extension`** 으로 명명한다.
 
-- **이유 1**: 기존 `c:/Users/jeong/projects/yoshinoid/dotclaude/src/dotclaude/parser/parsers/plugins.py` 의 `PluginsStatus` (Claude Code marketplace plug-in 파싱) 와 어휘 격리
+- **이유 1**: 기존 `c:/Users/jeong/projects/yoshinoid/dotclaude-suite/dotclaude/src/dotclaude/parser/parsers/plugins.py` 의 `PluginsStatus` (Claude Code marketplace plug-in 파싱) 와 어휘 격리
 - **이유 2**: Q3 spec 의 `EvolvePlugin` Protocol 은 spec 자체 고유 식별자이므로 **타입 이름만 `EvolveExtension` 으로 rename** (Q3 spec §15 v1.1 note 에 alias 기록 완료)
 - **이유 3**: "extension" 은 파이썬 생태계 (`pytest`, `mkdocs`) 에서 load/registry 의미로 굳은 단어
 - **이유 4**: `plugin.toml` → **`extension.toml`**, `loader.py` → `extension_loader.py`, `registry.py` → `extension_registry.py` 일관 변경
@@ -92,7 +92,7 @@ fail 시 **수동 fix** (자동 rollback 금지 — 위험).
 
 ### A. 신규 생성 (Track 1 — dotclaude-core, 33 파일)
 
-- **packaging**: `c:/Users/jeong/projects/yoshinoid/dotclaude-core/{pyproject.toml, README.md, .gitignore, ruff.toml}`
+- **packaging**: `c:/Users/jeong/projects/yoshinoid/dotclaude-suite/dotclaude-core/{pyproject.toml, README.md, .gitignore, ruff.toml}`
 - **core src** (15): `dotclaude_core/{__init__, contracts, config, classify_path, write_gateway, git_ops, later_store, event_bus, extension_loader, extension_registry, evolve_kernel, kv_store, scheduler}.py`
 - **safety** (4): `dotclaude_core/safety/{__init__, permissions, file_lock, sandbox}.py`
 - **tests unit** (8): `tests/unit/{conftest, test_contracts, test_classify_path, test_write_gateway, test_later_store, test_permissions, test_extension_loader, test_git_ops, test_event_bus}.py`
@@ -100,7 +100,7 @@ fail 시 **수동 fix** (자동 rollback 금지 — 위험).
 
 ### A'. 신규 생성 (Track 1 — dotclaude-usage, 7 파일)
 
-- `c:/Users/jeong/projects/yoshinoid/dotclaude-usage/{pyproject.toml, extension.toml, README.md}`
+- `c:/Users/jeong/projects/yoshinoid/dotclaude-suite/dotclaude-usage/{pyproject.toml, extension.toml, README.md}`
 - `dotclaude_usage/{__init__.py, extension.py, scanners/hook_failure_scanner.py, proposers/memory_update_proposer.py, templates/usage_report.md.j2}`
 - `tests/test_usage_extension.py`
 
@@ -114,9 +114,9 @@ fail 시 **수동 fix** (자동 rollback 금지 — 위험).
 
 ### B. 수정 (3 파일, spec only)
 
-- `c:/Users/jeong/projects/yoshinoid/dotclaude/.claude/docs/specs/2026-04-10-yoshinoid-meta-agent-phase-0.md` ✅ TS-1 적용 완료 (§7.2 Track 1 criteria + §15 v2.1)
-- `c:/Users/jeong/projects/yoshinoid/dotclaude/.claude/docs/specs/2026-04-10-dotclaude-plugin-nucleus-architecture.md` ✅ TS-2 적용 완료 (§16 v1.1 Extension rename note)
-- (선택, T14 후) `c:/Users/jeong/projects/yoshinoid/dotclaude/src/dotclaude/__init__.py` — 신규 `dotclaude.extensions` namespace export
+- `c:/Users/jeong/projects/yoshinoid/dotclaude-suite/dotclaude/.claude/docs/specs/2026-04-10-yoshinoid-meta-agent-phase-0.md` ✅ TS-1 적용 완료 (§7.2 Track 1 criteria + §15 v2.1)
+- `c:/Users/jeong/projects/yoshinoid/dotclaude-suite/dotclaude/.claude/docs/specs/2026-04-10-dotclaude-plugin-nucleus-architecture.md` ✅ TS-2 적용 완료 (§16 v1.1 Extension rename note)
+- (선택, T14 후) `c:/Users/jeong/projects/yoshinoid/dotclaude-suite/dotclaude/src/dotclaude/__init__.py` — 신규 `dotclaude.extensions` namespace export
 
 ### C. 참조만 (read-only)
 
@@ -132,7 +132,7 @@ fail 시 **수동 fix** (자동 rollback 금지 — 위험).
 - `c:/Users/jeong/.claude/memory/secretary_*.md`, `career_*.md`, `ideamgr_*.md` — **생성 금지** (HARD #5 lens namespace)
 - `c:/Users/jeong/.claude/settings.json` — chezmoi 회피 (HARD #9)
 - `**/.env*`, `*.pem`, `*_secret*`, `*_key*` (HARD #8)
-- `c:/Users/jeong/projects/yoshinoid/dotclaude/src/dotclaude/parser/parsers/plugins.py` — 기존 namespace 보호 (P0-1)
+- `c:/Users/jeong/projects/yoshinoid/dotclaude-suite/dotclaude/src/dotclaude/parser/parsers/plugins.py` — 기존 namespace 보호 (P0-1)
 - 기존 `dotclaude/src/dotclaude/**` Phase 0 = wrapping 없음 (T14 만 새 sub-module 추가)
 
 ---

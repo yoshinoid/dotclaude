@@ -469,7 +469,7 @@ dotclaude-usage/
 
 ### 연결 문서
 - `~/.claude/docs/later.md` — Deferred (self-evolver) 섹션: Q1-Q3 미결 항목
-- `C:\Users\jeong\projects\yoshinoid\dotclaude-rag\.claude\docs\specs\2026-04-09-phase1-knowledge-pipeline.md` — RAG phase1 spec (형식 참조)
+- `C:\Users\jeong\projects\yoshinoid\dotclaude-suite\dotclaude-rag\.claude\docs\specs\2026-04-09-phase1-knowledge-pipeline.md` — RAG phase1 spec (형식 참조)
 
 ### 브레인스토밍 세션 메타
 - **세션 날짜**: 2026-04-10
