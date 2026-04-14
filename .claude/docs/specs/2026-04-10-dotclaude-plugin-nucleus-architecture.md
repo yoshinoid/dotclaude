@@ -1,9 +1,9 @@
 ---
 title: dotclaude Plug-in Nucleus Architecture (Q3 수렴)
 date: 2026-04-10
-status: approved (v1.2 — 2026-04-11 late rename cascade terminology note 추가. content 는 historical preserve)
-version: 1.2
-source: self-evolver-2026-04-10-q3 (25 loops, partial-max) + 2026-04-11 Extension rename note (v1.1) + 2026-04-11 late knowledge rename cascade terminology (v1.2)
+status: approved (v1.3 — 2026-04-12 saturation-loop rename terminology note 추가. content 는 historical preserve)
+version: 1.3
+source: saturation-looper-2026-04-10-q3 (formerly self-evolver, renamed 2026-04-12, 25 loops partial-max) + 2026-04-11 Extension rename note (v1.1) + 2026-04-11 late knowledge rename cascade terminology (v1.2) + 2026-04-12 saturation-loop rename terminology (v1.3)
 anchor_ref: user_dotclaude_q3_architecture_intent_anchor.md
 related_specs:
   - 2026-04-11-knowledge-store-separation-and-rename-cascade.md (v1 — rename cascade canonical)
